@@ -235,7 +235,7 @@
      * Scroll Event
      */
 
-    $window.on('scroll.scrollDepth', throttle(function() {
+    var scrollEventHandler = throttle(function() {
       /*
        * We calculate document and window height on each scroll event to
        * account for dynamic DOM changes.
@@ -253,7 +253,7 @@
 
       // If all marks already hit, unbind scroll event
       if (cache.length >= 4 + options.elements.length) {
-        $window.off('scroll.scrollDepth');
+        $window.off('scroll', scrollEventHandler);
         return;
       }
 
@@ -266,7 +266,9 @@
       if (options.percentage) {
         checkMarks(marks, scrollDistance, timing);
       }
-    }, 500));
+    }, 500);
+
+    $window.on('scroll', scrollEventHandler);
 
   };
 
