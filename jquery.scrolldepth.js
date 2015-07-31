@@ -46,6 +46,15 @@
   }
 
   /*
+   * Reliably get the window height.
+   * Ref: http://www.w3schools.com/js/js_window.asp
+   */
+
+  function getWindowHeight() {
+    return window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
+  }
+
+  /*
    * Plugin
    */
 
@@ -260,7 +269,7 @@
        */
 
       var docHeight = getDocumentHeight(),
-        winHeight = window.innerHeight ? window.innerHeight : $window.height(),
+        winHeight = getWindowHeight(),
         scrollDistance = $window.scrollTop() + winHeight,
 
         // Recalculate percentage marks
