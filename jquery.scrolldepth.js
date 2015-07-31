@@ -40,6 +40,17 @@
   }
 
   /*
+   * Returns true if the element is in the array. Exact comparison is used.
+   */
+
+  function inArray(array, element) {
+    for ( var i=0; i<array.length; i++ )
+      if ( array[i] === element )
+        return true;
+    return false;
+  }
+
+  /*
    * Reliably get the document height.
    * Borrowed from:
    * jQuery
@@ -274,7 +285,7 @@
         if ( !marks.hasOwnProperty(key) )
           continue;
         var val = marks[key];
-        if ( $.inArray(key, cache) === -1 && scrollDistance >= val ) {
+        if ( !inArray(cache, key) && scrollDistance >= val ) {
           sendEvent('Percentage', key, scrollDistance, timing);
           cache.push(key);
         }
@@ -284,7 +295,7 @@
     function checkElements(elements, scrollDistance, timing) {
       for ( var i=0; i<elements.length; i++) {
         var elem = elements[i];
-        if ( $.inArray(elem, cache) === -1 ) {
+        if ( !inArray(cache, elem) ) {
           var elemNode = (typeof elem === "string") ? getElementBySelector(elem) : elem;
           if ( elemNode ) {
             var elemYOffset = getElementYOffsetToDocumentTop(elemNode);
