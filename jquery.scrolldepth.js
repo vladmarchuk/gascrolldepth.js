@@ -55,6 +55,15 @@
   }
 
   /*
+   * Reliably get the page y-axis offset due to scrolling.
+   * Ref: https://developer.mozilla.org/en-US/docs/Web/API/Window/scrollY
+   */
+
+  function getPageYOffset() {
+    return window.pageYOffset || (document.compatMode === "CSS1Compat" ? document.documentElement.scrollTop : document.body.scrollTop);
+  }
+
+  /*
    * Plugin
    */
 
@@ -270,7 +279,7 @@
 
       var docHeight = getDocumentHeight(),
         winHeight = getWindowHeight(),
-        scrollDistance = $window.scrollTop() + winHeight,
+        scrollDistance = getPageYOffset() + winHeight,
 
         // Recalculate percentage marks
         marks = calculateMarks(docHeight),
