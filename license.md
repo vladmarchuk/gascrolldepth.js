@@ -1,4 +1,4 @@
-Copyright (c) 2009-2015 Rob Flaherty
+Copyright (c) 2009-2015 Rob Flaherty, Leigh McCulloch
 
 -----------------------------------------------------------------------------
 
