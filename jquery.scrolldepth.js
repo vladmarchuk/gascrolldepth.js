@@ -28,6 +28,24 @@
     standardEventHandler;
 
   /*
+   * Reliably get the document height.
+   * Borrowed from:
+   * jQuery
+   * https://jquery.org/
+   * Ref: https://github.com/jquery/jquery/blob/a644101ed04d0beacea864ce805e0c4f86ba1cd1/src/dimensions.js#L33
+   * Copyright: jQuery Foundation and other contributors
+   * License: https://github.com/jquery/jquery/blob/a644101ed04d0beacea864ce805e0c4f86ba1cd1/LICENSE.txt
+   */
+
+  function getDocumentHeight() {
+    return Math.max(
+      document.documentElement["scrollHeight"], document.body["scrollHeight"],
+      document.documentElement["offsetHeight"], document.body["offsetHeight"],
+      document.documentElement["clientHeight"]
+    );
+  }
+
+  /*
    * Plugin
    */
 
@@ -38,7 +56,7 @@
     options = $.extend({}, defaults, options);
 
     // Return early if document height is too small
-    if ( $(document).height() < options.minHeight ) {
+    if ( getDocumentHeight() < options.minHeight ) {
       return;
     }
 
@@ -241,7 +259,7 @@
        * account for dynamic DOM changes.
        */
 
-      var docHeight = $(document).height(),
+      var docHeight = getDocumentHeight(),
         winHeight = window.innerHeight ? window.innerHeight : $window.height(),
         scrollDistance = $window.scrollTop() + winHeight,
 
