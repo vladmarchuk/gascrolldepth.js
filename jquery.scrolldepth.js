@@ -19,8 +19,7 @@
     gtmOverride: false
   };
 
-  var $window = $(window),
-    cache = [],
+  var cache = [],
     lastPixelDepth = 0,
     universalGA,
     classicGA,
@@ -61,6 +60,31 @@
 
   function getPageYOffset() {
     return window.pageYOffset || (document.compatMode === "CSS1Compat" ? document.documentElement.scrollTop : document.body.scrollTop);
+  }
+
+  /*
+   * Register and Deregister for `eventName` on `element`.
+   * Aims to support all browsers.
+   */
+
+  function addEventListener(element, eventName, handler) {
+    if ( element.addEventListener ) {
+      element.addEventListener(eventName, handler, false);
+    } else if ( element.attachEvent )  {
+      element.attachEvent('on' + eventName, handler);
+    } else {
+      element['on' + eventName] = handler;
+    }
+  }
+
+  function removeEventListener(element, eventName, handler) {
+    if ( element.removeEventListener ) {
+      element.removeEventListener(type, handler, false);
+    } else if ( element.detachEvent ) {
+      element.detachEvent('on' + type, handler);
+    } else {
+      element['on' + type] = null;
+    }
   }
 
   /*
@@ -289,7 +313,7 @@
 
       // If all marks already hit, unbind scroll event
       if (cache.length >= 4 + options.elements.length) {
-        $window.off('scroll', scrollEventHandler);
+        removeEventListener(window, 'scroll', scrollEventHandler);
         return;
       }
 
@@ -304,7 +328,7 @@
       }
     }, 500);
 
-    $window.on('scroll', scrollEventHandler);
+    addEventListener(window, 'scroll', scrollEventHandler);
 
   };
 
