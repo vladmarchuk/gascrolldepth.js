@@ -128,9 +128,9 @@
 
   function removeEventListener(element, eventName, handler) {
     if ( element.removeEventListener ) {
-      element.removeEventListener(type, handler, false);
+      element.removeEventListener(eventName, handler, false);
     } else if ( element.detachEvent ) {
-      element.detachEvent('on' + type, handler);
+      element.detachEvent('on' + eventName, handler);
     } else {
       element['on' + type] = null;
     }
