@@ -1,10 +1,10 @@
 /*!
  * @preserve
- * jquery.scrolldepth.js | v0.8
- * Copyright (c) 2015 Rob Flaherty (@robflaherty)
+ * gascrolldepth.js | v1.0
+ * Copyright (c) 2015 Rob Flaherty (@robflaherty), Leigh McCulloch (@___leigh___)
  * Licensed under the MIT and GPL licenses.
  */
-;(function ( $, window, document, undefined ) {
+;(function ( window, document, undefined ) {
 
   "use strict";
 
@@ -19,8 +19,7 @@
     gtmOverride: false
   };
 
-  var $window = $(window),
-    cache = [],
+  var cache = [],
     lastPixelDepth = 0,
     universalGA,
     classicGA,
@@ -28,17 +27,127 @@
     standardEventHandler;
 
   /*
-   * Plugin
+   * Extend a series of objects with the properties of each.
+   * Ref: http://stackoverflow.com/a/11197343/159762
    */
 
-  $.scrollDepth = function(options) {
+  function extend(){
+    for ( var i=1; i<arguments.length; i++ )
+      for ( var key in arguments[i] )
+        if ( arguments[i].hasOwnProperty(key) )
+          arguments[0][key] = arguments[i][key];
+    return arguments[0];
+  }
+
+  /*
+   * Returns true if the element is in the array. Exact comparison is used.
+   */
+
+  function inArray(array, element) {
+    for ( var i=0; i<array.length; i++ )
+      if ( array[i] === element )
+        return true;
+    return false;
+  }
+
+  /*
+   * Reliably get the document height.
+   * Borrowed from:
+   * jQuery
+   * https://jquery.org/
+   * Ref: https://github.com/jquery/jquery/blob/a644101ed04d0beacea864ce805e0c4f86ba1cd1/src/dimensions.js#L33
+   * Copyright: jQuery Foundation and other contributors
+   * License: https://github.com/jquery/jquery/blob/a644101ed04d0beacea864ce805e0c4f86ba1cd1/LICENSE.txt
+   */
+
+  function getDocumentHeight() {
+    return Math.max(
+      document.documentElement["scrollHeight"], document.body["scrollHeight"],
+      document.documentElement["offsetHeight"], document.body["offsetHeight"],
+      document.documentElement["clientHeight"]
+    );
+  }
+
+  /*
+   * Reliably get the window height.
+   * Ref: http://www.w3schools.com/js/js_window.asp
+   */
+
+  function getWindowHeight() {
+    return window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
+  }
+
+  /*
+   * Reliably get the page y-axis offset due to scrolling.
+   * Ref: https://developer.mozilla.org/en-US/docs/Web/API/Window/scrollY
+   */
+
+  function getPageYOffset() {
+    return window.pageYOffset || (document.compatMode === "CSS1Compat" ? document.documentElement.scrollTop : document.body.scrollTop);
+  }
+
+  /*
+   * Reliably get the element's y-axis offset to the document top.
+   * Ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/getBoundingClientRect
+   */
+
+  function getElementYOffsetToDocumentTop(element) {
+    return element.getBoundingClientRect().top + getPageYOffset();
+  }
+
+  /*
+   * Try really hard to get the first element matching a selector.
+   * Aims to support all browsers at least for selectors starting with `#`.
+   */
+
+  function getElementBySelector(selector) {
+    if (typeof window['jQuery'] !== 'undefined') {
+      return window['jQuery'](selector).get(0);
+    } else if (typeof document.querySelector !== 'undefined') {
+      return document.querySelector(selector);
+    } else if (selector.charAt(0) == '#') {
+      return document.getElementById(selector.substr(1));
+    }
+    return undefined;
+  }
+
+  /*
+   * Register and Deregister for `eventName` on `element`.
+   * Aims to support all browsers.
+   */
+
+  function addEventListener(element, eventName, handler) {
+    if ( element.addEventListener ) {
+      element.addEventListener(eventName, handler, false);
+    } else if ( element.attachEvent )  {
+      element.attachEvent('on' + eventName, handler);
+    } else {
+      element['on' + eventName] = handler;
+    }
+  }
+
+  function removeEventListener(element, eventName, handler) {
+    if ( element.removeEventListener ) {
+      element.removeEventListener(eventName, handler, false);
+    } else if ( element.detachEvent ) {
+      element.detachEvent('on' + eventName, handler);
+    } else {
+      element['on' + type] = null;
+    }
+  }
+
+  /*
+   * Library Interface
+   */
+
+  var init = function(options) {
 
     var startTime = +new Date;
 
-    options = $.extend({}, defaults, options);
+    options = extend({}, defaults, options);
 
     // Return early if document height is too small
-    if ( $(document).height() < options.minHeight ) {
+    if ( getDocumentHeight() < options.minHeight ) {
       return;
     }
 
@@ -172,23 +281,31 @@
 
     function checkMarks(marks, scrollDistance, timing) {
       // Check each active mark
-      $.each(marks, function(key, val) {
-        if ( $.inArray(key, cache) === -1 && scrollDistance >= val ) {
+      for ( var key in marks ) {
+        if ( !marks.hasOwnProperty(key) )
+          continue;
+        var val = marks[key];
+        if ( !inArray(cache, key) && scrollDistance >= val ) {
           sendEvent('Percentage', key, scrollDistance, timing);
           cache.push(key);
         }
-      });
+      }
     }
 
     function checkElements(elements, scrollDistance, timing) {
-      $.each(elements, function(index, elem) {
-        if ( $.inArray(elem, cache) === -1 && $(elem).length ) {
-          if ( scrollDistance >= $(elem).offset().top ) {
-            sendEvent('Elements', elem, scrollDistance, timing);
-            cache.push(elem);
+      for ( var i=0; i<elements.length; i++) {
+        var elem = elements[i];
+        if ( !inArray(cache, elem) ) {
+          var elemNode = (typeof elem === "string") ? getElementBySelector(elem) : elem;
+          if ( elemNode ) {
+            var elemYOffset = getElementYOffsetToDocumentTop(elemNode);
+            if ( scrollDistance >= elemYOffset ) {
+              sendEvent('Elements', elem, scrollDistance, timing);
+              cache.push(elem);
+            }
           }
         }
-      });
+      };
     }
 
     function rounded(scrollDistance) {
@@ -235,15 +352,15 @@
      * Scroll Event
      */
 
-    $window.on('scroll.scrollDepth', throttle(function() {
+    var scrollEventHandler = throttle(function() {
       /*
        * We calculate document and window height on each scroll event to
        * account for dynamic DOM changes.
        */
 
-      var docHeight = $(document).height(),
-        winHeight = window.innerHeight ? window.innerHeight : $window.height(),
-        scrollDistance = $window.scrollTop() + winHeight,
+      var docHeight = getDocumentHeight(),
+        winHeight = getWindowHeight(),
+        scrollDistance = getPageYOffset() + winHeight,
 
         // Recalculate percentage marks
         marks = calculateMarks(docHeight),
@@ -253,7 +370,7 @@
 
       // If all marks already hit, unbind scroll event
       if (cache.length >= 4 + options.elements.length) {
-        $window.off('scroll.scrollDepth');
+        removeEventListener(window, 'scroll', scrollEventHandler);
         return;
       }
 
@@ -266,8 +383,26 @@
       if (options.percentage) {
         checkMarks(marks, scrollDistance, timing);
       }
-    }, 500));
+    }, 500);
+
+    addEventListener(window, 'scroll', scrollEventHandler);
 
   };
 
-})( jQuery, window, document );
+  /*
+   * Globals
+   */
+
+  window.scrollDepth = {
+    init: init
+  };
+
+  /*
+   * jQuery Plugin
+   */
+
+  if ( typeof window['jQuery'] !== 'undefined' ) {
+    window['jQuery'].scrollDepth = init;
+  }
+
+})( window, document );
