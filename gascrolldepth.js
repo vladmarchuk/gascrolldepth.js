@@ -393,7 +393,7 @@
    * Globals
    */
 
-  window.scrollDepth = {
+  window.gascrolldepth = {
     init: init
   };
 
@@ -402,7 +402,7 @@
    */
 
   if ( typeof window['jQuery'] !== 'undefined' ) {
-    window['jQuery'].scrollDepth = init;
+    window['jQuery'].gascrolldepth = init;
   }
 
 })( window, document );
