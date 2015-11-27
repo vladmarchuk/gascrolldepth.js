@@ -1,11 +1,11 @@
 {
-  "name": "scroll-depth",
-  "main": "scrolldepth.js",
-  "version": "0.8.0",
-  "homepage": "http://scrolldepth.parsnip.io",
+  "name": "gascrolldepth",
+  "main": "gascrolldepth.js",
+  "version": "1.0.0",
+  "homepage": "http://github.com/leighmcculloch/gascrolldepth.js",
   "authors": [
     { "name": "Rob Flaherty" },
-    { "nmae": "Leigh McCulloch", "homepage": "https://leighmcculloch.com" }
+    { "name": "Leigh McCulloch", "homepage": "https://leighmcculloch.com" }
   ],
   "description": "A Google Analytics plugin for measuring page scrolling.",
   "moduleType": [

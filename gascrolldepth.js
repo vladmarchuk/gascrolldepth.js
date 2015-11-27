@@ -1,6 +1,6 @@
 /*!
  * @preserve
- * jquery.scrolldepth.js | v0.8
+ * gascrolldepth.js | v1.0
  * Copyright (c) 2015 Rob Flaherty (@robflaherty), Leigh McCulloch (@___leigh___)
  * Licensed under the MIT and GPL licenses.
  */
