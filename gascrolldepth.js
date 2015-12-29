@@ -8,24 +8,6 @@
 
   "use strict";
 
-  var defaults = {
-    minHeight: 0,
-    elements: [],
-    percentage: true,
-    userTiming: true,
-    pixelDepth: true,
-    nonInteraction: true,
-    gaGlobal: false,
-    gtmOverride: false
-  };
-
-  var cache = [],
-    lastPixelDepth = 0,
-    universalGA,
-    classicGA,
-    gaGlobal,
-    standardEventHandler;
-
   /*
    * Extend a series of objects with the properties of each.
    * Ref: http://stackoverflow.com/a/11197343/159762
@@ -48,6 +30,13 @@
       if ( array[i] === element )
         return true;
     return false;
+  }
+
+  /*
+   * Returns true if the object is an array.
+   */
+  function isArray(object) {
+    return Object.prototype.toString.call(elems) === '[object Array]';
   }
 
   /*
@@ -137,14 +126,50 @@
   }
 
   /*
+   * Module variables.
+   */
+  var defaults = {
+    minHeight: 0,
+    elements: [],
+    percentage: true,
+    userTiming: true,
+    pixelDepth: true,
+    nonInteraction: true,
+    gaGlobal: false,
+    gtmOverride: false
+  };
+
+  var options = extend({}, defaults),
+    cache = [],
+    lastPixelDepth = 0,
+    universalGA,
+    classicGA,
+    gaGlobal,
+    standardEventHandler,
+    scrollEventHandler;
+
+  /*
+   * Bind and unbind the scroll event handler.
+   */
+
+  function bindScrollDepth(scrollEventHandler) {
+    addEventListener(window, 'scroll', scrollEventHandler);
+  }
+
+  function unbindScrollDepth(scrollEventHandler) {
+    removeEventListener(window, 'scroll', scrollEventHandler);
+  }
+
+  /*
    * Library Interface
    */
 
-  var init = function(options) {
+  // Initialize the library.
+  var init = function(initOptions) {
 
     var startTime = +new Date;
 
-    options = extend({}, defaults, options);
+    options = extend({}, defaults, initOptions);
 
     // Return early if document height is too small
     if ( getDocumentHeight() < options.minHeight ) {
@@ -352,7 +377,7 @@
      * Scroll Event
      */
 
-    var scrollEventHandler = throttle(function() {
+    scrollEventHandler = throttle(function() {
       /*
        * We calculate document and window height on each scroll event to
        * account for dynamic DOM changes.
@@ -370,7 +395,7 @@
 
       // If all marks already hit, unbind scroll event
       if (cache.length >= 4 + options.elements.length) {
-        removeEventListener(window, 'scroll', scrollEventHandler);
+        unbindScrollDepth();
         return;
       }
 
@@ -385,8 +410,58 @@
       }
     }, 500);
 
-    addEventListener(window, 'scroll', scrollEventHandler);
+    bindScrollDepth(scrollEventHandler);
+  };
 
+  // Reset Scroll Depth with the originally initialized options
+  var reset = function() {
+    cache = [];
+    lastPixelDepth = 0;
+
+    if (typeof scrollEventHandler == "undefined") {
+      return;
+    }
+
+    unbindScrollDepth(scrollEventHandler);
+    bindScrollDepth(scrollEventHandler);
+  };
+
+  // Add DOM elements to be tracked
+  var addElements = function(elems) {
+    if (typeof elems == "undefined") {
+      return;
+    }
+
+    if (!isArray(elems)) {
+      return;
+    }
+
+    for (var i=0; i<elems.length; i++) {
+      var elem = elems[i];
+      var elemIndex = options.elements.indexOf(elem);
+      if (elemIndex == -1) {
+        options.elements.push(elem);
+      }
+    }
+  };
+
+  // Remove DOM elements currently tracked
+  var removeElements = function(elems) {
+    if (typeof elems == "undefined") {
+      return;
+    }
+
+    if (!isArray(elems)) {
+      return;
+    }
+
+    for (var i=0; i<elems.length; i++) {
+      var elem = elems[i];
+      var elemIndex = options.elements.indexOf(elem);
+      if (elemIndex > -1) {
+        options.elements.splice(elemIndex, 1);
+      }
+    }
   };
 
   /*
@@ -394,7 +469,10 @@
    */
 
   window.gascrolldepth = {
-    init: init
+    init: init,
+    reset: reset,
+    addElements: addElements,
+    removeElements: removeElements
   };
 
   /*
