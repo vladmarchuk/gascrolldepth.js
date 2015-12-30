@@ -141,6 +141,7 @@
 
   var options = extend({}, defaults),
     cache = [],
+    scrollEventBound = false,
     lastPixelDepth = 0,
     universalGA,
     classicGA,
@@ -153,10 +154,12 @@
    */
 
   function bindScrollDepth(scrollEventHandler) {
+    scrollEventBound = true;
     addEventListener(window, 'scroll', scrollEventHandler);
   }
 
   function unbindScrollDepth(scrollEventHandler) {
+    scrollEventBound = false;
     removeEventListener(window, 'scroll', scrollEventHandler);
   }
 
@@ -265,7 +268,7 @@
         '25%' : parseInt(docHeight * 0.25, 10),
         '50%' : parseInt(docHeight * 0.50, 10),
         '75%' : parseInt(docHeight * 0.75, 10),
-        // 1px cushion to trigger 100% event in iOS
+        // Cushion to trigger 100% event in iOS
         '100%': docHeight - 5
       };
     }
@@ -394,11 +397,7 @@
 
   // Add DOM elements to be tracked
   var addElements = function(elems) {
-    if (typeof elems == "undefined") {
-      return;
-    }
-
-    if (!isArray(elems)) {
+    if (typeof elems == "undefined" || !isArray(elems)) {
       return;
     }
 
@@ -409,23 +408,29 @@
         options.elements.push(elem);
       }
     }
+
+    if (!scrollEventBound) {
+      bindScrollDepth();
+    }
   };
 
   // Remove DOM elements currently tracked
   var removeElements = function(elems) {
-    if (typeof elems == "undefined") {
-      return;
-    }
-
-    if (!isArray(elems)) {
+    if (typeof elems == "undefined" || !isArray(elems)) {
       return;
     }
 
     for (var i=0; i<elems.length; i++) {
       var elem = elems[i];
-      var elemIndex = options.elements.indexOf(elem);
-      if (elemIndex > -1) {
-        options.elements.splice(elemIndex, 1);
+
+      var elementsIndex = options.elements.indexOf(elem);
+      if (elementsIndex > -1) {
+        options.elements.splice(elementsIndex, 1);
+      }
+
+      var cacheIndex = cache.indexOf(elem);
+      if (cacheIndex > -1) {
+        cache.splice(cacheIndex, 1);
       }
     }
   };
