@@ -36,7 +36,7 @@
    * Returns true if the object is an array.
    */
   function isArray(object) {
-    return Object.prototype.toString.call(elems) === '[object Array]';
+    return Object.prototype.toString.call(object) === '[object Array]';
   }
 
   /*
