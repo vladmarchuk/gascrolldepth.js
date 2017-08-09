@@ -133,7 +133,7 @@
     elements: [],
     percentage: true,
     userTiming: true,
-    pixelDepth: true,
+    pixelDepth: false,
     nonInteraction: true,
     gaGlobal: false,
     gtmOverride: false
@@ -265,9 +265,15 @@
 
     function calculateMarks(docHeight) {
       return {
-        '25%' : parseInt(docHeight * 0.25, 10),
-        '50%' : parseInt(docHeight * 0.50, 10),
-        '75%' : parseInt(docHeight * 0.75, 10),
+        '10%' : parseInt(docHeight * 0.1, 10),
+        '20%' : parseInt(docHeight * 0.2, 10),
+        '30%' : parseInt(docHeight * 0.3, 10),
+        '40%' : parseInt(docHeight * 0.4, 10),
+        '50%' : parseInt(docHeight * 0.5, 10),
+        '60%' : parseInt(docHeight * 0.6, 10),
+        '70%' : parseInt(docHeight * 0.7, 10),
+        '80%' : parseInt(docHeight * 0.8, 10),
+        '90%' : parseInt(docHeight * 0.9, 10),
         // Cushion to trigger 100% event in iOS
         '100%': docHeight - 5
       };
@@ -363,7 +369,7 @@
         timing = +new Date - startTime;
 
       // If all marks already hit, unbind scroll event
-      if (cache.length >= 4 + options.elements.length) {
+      if (cache.length >= 10 + options.elements.length) {
         unbindScrollDepth();
         return;
       }
