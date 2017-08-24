@@ -286,7 +286,7 @@
           continue;
         var val = marks[key];
         if ( !inArray(cache, key) && scrollDistance >= val ) {
-          sendEvent('Percentage', key, scrollDistance, timing);
+          sendEvent(location.pathname, key, scrollDistance, timing);
           cache.push(key);
         }
       }
